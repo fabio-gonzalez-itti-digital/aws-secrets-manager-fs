@@ -317,7 +317,7 @@ def main() -> None:
     Implementa la lógica central de la herramienta.
     """
     parser = argparse.ArgumentParser(prog="aws_secrets_fs", description="Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.")
-    parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload", "view"], help="Acción a realizar.")
+    parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload"], help="Acción a realizar.")
     parser.add_argument("--aws_profile", type=str, required=False, help="Nombre del perfil AWS configurado.")
     args = parser.parse_args()
 
