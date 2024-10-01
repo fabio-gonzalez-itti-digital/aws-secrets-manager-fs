@@ -9,7 +9,7 @@ setup(
     author='Fabio Antonio González Sosa',
     author_email='fabio.gonzalez@itti.digital',
     license='MIT',
-    packages=['src'],
+    packages=['aws_secrets_fs'],
     install_requires=[
         'boto3==1.34.120'
     ]
