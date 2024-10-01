@@ -4,7 +4,7 @@ import json
 import hashlib
 import base64
 from botocore.exceptions import ClientError
-import aws
+from . import aws
 
 
 class bcolors:
@@ -351,7 +351,3 @@ def main() -> None:
         # Operar.
         profile = resolve_aws_profile(args)
         opt_upload(profile)
-
-
-if __name__ == '__main__':
-    main()
