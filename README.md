@@ -7,7 +7,13 @@ Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS
 - AWS CLI, versión `2.x.x` o superior.
 
 ## Instalación
-TBD
+Ver la sección de [releases](https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases) para conocer la última versión disponible. Se disponibiliza el módulo tanto como *source distribution* como *build distribution*.
+
+Ejemplo de instalación con `pip`:
+
+```
+pip install https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases/download/v0.0.1/aws_secrets_fs-0.0.1-py3-none-any.whl
+```
 
 ## Modo de Uso
 La herramienta permite subir/descargar archivos utilizando AWS Secrets Manager como backend. Los archivos involucrados se indican a través de archivos descriptores que asocian nombres de archivos locales con secretos en AWS Secret Manager.
