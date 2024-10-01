@@ -4,7 +4,7 @@ Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS
 ## Requerimientos
 - Python 3.
 - Boto 3, versión `1.34.120` o superior.
-- AWS Cli, versión `2.x.x` o superior.
+- AWS CLI, versión `2.x.x` o superior.
 
 ## Instalación
 TBD

@@ -162,4 +162,4 @@ cython_debug/
 .idea/
 
 # Custom
-*.aws_fs_descriptor
+*.aws_secrets

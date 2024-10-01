@@ -1,6 +1,4 @@
 import argparse
-import shutil
-import subprocess
 import os
 import json
 import hashlib
@@ -8,9 +6,20 @@ import base64
 from botocore.exceptions import ClientError
 import aws
 
+
 class bcolors:
     """
-    Constantes para utilización de colores POSIX en salida estándar.
+    Constantes para utilización de códigos de escape POSIX en salida estándar.
+    Attributes:
+        ENDC: Código de escape para fin de formateo.
+        HEADER: Código de escape para indicar de texto en negrita.
+        OKBLUE: Código de escape para inidicar estado de éxito utilizando color azul.
+        OKCYAN: Código de escape para inidicar estado de éxito utilizando color cyan.
+        OKGREEN: Código de escape para inidicar estado de éxito utilizando color verde.
+        WARNING: Código de escape para indicar estado de advertencia.
+        WARNING: Código de escape para indicar estado de fallo.
+        BOLD: Código de escape para indicar de texto en negrita.
+        UNDERLINE: Código de escape para indicar texto subrayado.
     """
     ENDC = '\033[0m'
     HEADER = '\033[95m'
@@ -26,6 +35,9 @@ class bcolors:
 class DescriptorFileEntry:
     """
     Entrada de un archivo de tipo descriptor.
+    Attributes:
+        filename: nombre para archivo en sistema de archivos local.
+        secretname: nombre para secreto en Secrets Manager.
     """
     filename = ""
     secretname = ""
@@ -47,50 +59,47 @@ class DescriptorFileEntry:
 def opt_check() -> None:
     """
     Verifica las dependencias necesarias. De momento, que esté instalado aws cli.
+
     Se imprime la versión encontrada y los perfiles configurados.
     """
     # Verificar si aws cli esta disponible.
-    command = shutil.which("aws")
-    if command == None or command == "":
+    aws_cli_available = aws.aws_cli_available()
+    if aws_cli_available == False:
         print(bcolors.FAIL + "Error: No se encontró AWS CLI." + bcolors.ENDC)
         exit(1)
 
     # Versión de aws cli.
-    aws_version = ""
-    out = subprocess.check_output(['aws', '--version'])
-    if out == None or out == '':
+    aws_version = aws.aws_cli_version()
+    if aws_version == None:
         print(bcolors.FAIL + "Error: No se pudo determinar la versión de AWS CLI." + bcolors.ENDC)
         exit(1)
-    aws_version = out.decode("utf-8").strip().split(" ")[0].split("/")[1]
     print("AWS CLI Version: {0}{1}{2}".format(bcolors.OKGREEN, aws_version, bcolors.ENDC))
 
     # Listar perfiles disponibles.
-    aws_profiles = list()
     try:
-        # NOTE: aws configure list-profiles existe a partir de la versión 2.x.x.
-        out = subprocess.check_output(['aws', 'configure', 'list-profiles'])
-        if out != None:
-            lines = out.decode("utf-8").split('\n')
-            for line in lines:
-                if line != None:
-                    line = line.strip()
-                    if line != "":
-                        aws_profiles.append(line)
-        print("AWS CLI Profiles {0}({1}){2}:".format(bcolors.OKGREEN, len(aws_profiles), bcolors.ENDC))
+        # Obtener perfiles.
+        aws_profiles = aws.aws_cli_profiles()
+        if aws_profiles == None:
+            raise Exception("No se pudieron obtener perfiles.")
+
+        # Listar perfiles.
+        print("AWS CLI Profiles:")
         for aws_profile in aws_profiles:
             print("  • {0}".format(aws_profile))
     except Exception:
         print(bcolors.WARNING + "Advertencia: \"aws configure list-profiles\" no soportado." + bcolors.ENDC)
+        exit(1)
 
 
 def get_descriptor_files(path: str) -> list[str]:
     """
-    Obtiene la lista de archivos de tipo descriptor. Archivos con extensión: .aws_fs_descriptor.
-    path: Path donde buscar los archivos de tipo descriptor.
+    Obtiene la lista de archivos de tipo descriptor. Archivos con extensión: .aws_secrets.
+    Parameters:
+        path: Path donde buscar los archivos de tipo descriptor.
     """
     filepaths = list()
     for filepath in os.listdir(path):
-        if filepath.endswith(".aws_fs_descriptor"):
+        if filepath.endswith(".aws_secrets"):
             p = os.path.join(path, filepath).strip()
             filepaths.append(p)
     return filepaths
@@ -99,7 +108,8 @@ def get_descriptor_files(path: str) -> list[str]:
 def parse_descriptor_file(path: str) -> list[DescriptorFileEntry]:
     """
     Parsea el contenido de un archivo de tipo descriptor y retorna las entradas encontradas.
-    path: Path de archivo tipo descriptor.
+    Parameters:
+        path: Path de archivo tipo descriptor.
     """
     entries = list()
     with open(path, "r", encoding="utf-8") as file:
@@ -111,6 +121,7 @@ def parse_descriptor_file(path: str) -> list[DescriptorFileEntry]:
                 entry = DescriptorFileEntry(a.strip(), b.strip())
                 entries.append(entry)
     return entries
+
 
 def hash_file(path: str) -> str:
     """
@@ -126,10 +137,12 @@ def hash_file(path: str) -> str:
             md5.update(data)
     return md5.hexdigest()
 
+
 def opt_download(profile: str) -> None:
     """
     Procesa las entradas en archivos tipo descriptor y se encarga de recrear el contenido de los archivos indicados.
-    profile: Perfil aws a utilizar.
+    Parameters:
+        profile: Perfil aws a utilizar.
     """
     # Obtener descriptores en carpeta actual.
     descriptors = get_descriptor_files(".")
@@ -181,7 +194,7 @@ def opt_download(profile: str) -> None:
 
             # Recrear archivo.
             targetfile = os.path.join(".", entry.filename)
-            if(os.path.exists(targetfile)):
+            if (os.path.exists(targetfile)):
                 print("Sobreescribiendo archivo ...")
             else:
                 print("Creando archivo ...")
@@ -208,11 +221,13 @@ def opt_download(profile: str) -> None:
             else:
                 print("Comprobación: ko.")
 
+
 def opt_upload(profile):
     """
     Procesa las entradas en archivos tipo descriptor y se encarga de subir el contenido de los archivos indicados y asociarlos
     a un secreto de aws secrets manager.
-    profile: Perfil aws a utilizar.
+    Parameters:
+        profile: Perfil aws a utilizar.
     """
     # Obtener descriptores en carpeta actual.
     descriptors = get_descriptor_files(".")
@@ -228,7 +243,7 @@ def opt_upload(profile):
 
             # El archivo debe existir.
             targetfile = os.path.join(".", entry.filename)
-            if(os.path.exists(targetfile) == False):
+            if (os.path.exists(targetfile) == False):
                 print(bcolors.FAIL + "Error: el archivo no existe." + bcolors.ENDC)
                 continue
 
@@ -252,7 +267,7 @@ def opt_upload(profile):
                 with open(targetfile, "rb") as file:
                     b64 = base64.b64encode(file.read()).decode("utf-8")
                     for i in range(0, len(b64), CHUNK_SIZE):
-                        chunks.append(b64[i : i + CHUNK_SIZE])
+                        chunks.append(b64[i: i + CHUNK_SIZE])
             except Exception as e:
                 print("Error: " + str(e))
                 print(bcolors.FAIL + "Error: no se pudieron calcular las partes del archivo." + bcolors.ENDC)
@@ -299,6 +314,7 @@ def opt_upload(profile):
                 # Siguiente numero de parte.
                 i = i + 1
 
+
 def resolve_aws_profile(args: any) -> str:
     """
     Determina el perfil AWS a utilizar para ciertas operaciones que lo requieren. Imprime advertencias si es necesario.
@@ -312,13 +328,14 @@ def resolve_aws_profile(args: any) -> str:
         print("{0}Utilizando perfil \"{1}\".{2}".format(bcolors.OKBLUE, profile, bcolors.ENDC))
     return profile
 
+
 def main() -> None:
     """
     Implementa la lógica central de la herramienta.
     """
     parser = argparse.ArgumentParser(prog="aws_secrets_fs", description="Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.")
     parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload"], help="Acción a realizar.")
-    parser.add_argument("--aws_profile", type=str, required=False, help="Nombre del perfil AWS configurado.")
+    parser.add_argument("--aws-profile", type=str, required=False, help="Nombre del perfil AWS configurado.")
     args = parser.parse_args()
 
     if args.action == "check":
