@@ -98,3 +98,23 @@ def create_secret(secret_name: str, secret_value: str, profile: str) -> tuple[an
         return response, None
     except Exception as e:
         return None, e
+
+
+def delete_secret(secret_name: str, profile: str) -> tuple[any, None] | tuple[None, Exception]:
+    """
+    Elmina un secreto en aws secrets manager.
+    Parameters:
+        secret_name: Nombre del secreto a eliminar.
+        secret_value: Valor para secreto.
+        profile: Perfil aws a utilizar.
+    """
+    try:
+        session = boto3.Session(profile_name=profile)
+        client = session.client('secretsmanager')
+        response = client.delete_secret(
+            SecretId=secret_name,
+            ForceDeleteWithoutRecovery=True
+        )
+        return response, None
+    except Exception as e:
+        return None, e

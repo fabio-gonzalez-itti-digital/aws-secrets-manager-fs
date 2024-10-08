@@ -315,7 +315,25 @@ def opt_upload(profile):
                 i = i + 1
 
 
-def resolve_aws_profile(args: any) -> str:
+def opt_delete(profile, secret_name):
+    """
+    Elimina un secreto existente en AWS Secrets Manager.
+    Parameters:
+        profile: Perfil aws a utilizar.
+    """
+    try:
+        # Eliminar secreto.
+        print(f"Eliminando: \"{secret_name}\".")
+        response, err = aws.delete_secret(secret_name, profile)
+        if err != None:
+            raise err
+        print("Secret eliminado.")
+    except Exception as e:
+        print("Error: " + str(e))
+        print(bcolors.FAIL + "Error: no se puedo eliminar el secreto indicado." + bcolors.ENDC)
+
+
+def resolve_aws_profile(args: argparse.Namespace) -> str:
     """
     Determina el perfil AWS a utilizar para ciertas operaciones que lo requieren. Imprime advertencias si es necesario.
     """
@@ -329,13 +347,26 @@ def resolve_aws_profile(args: any) -> str:
     return profile
 
 
+def resolve_secret_name(args: argparse.Namespace, msg: str) -> str:
+    """
+    Determina el valor de secreto AWS indicado.
+    """
+    # Resolver perfil aws. Si no se indica, se utiliza "default".
+    secret_name = args.aws_secret
+    if secret_name == None or secret_name == "":
+        print(bcolors.FAIL + msg + bcolors.ENDC)
+        exit(1)
+    return secret_name
+
+
 def main() -> None:
     """
     Implementa la lógica central de la herramienta.
     """
     parser = argparse.ArgumentParser(prog="aws_secrets_fs", description="Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.")
-    parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload"], help="Acción a realizar.")
+    parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload", "delete"], help="Acción a realizar.")
     parser.add_argument("--aws-profile", type=str, required=False, help="Nombre del perfil AWS configurado.")
+    parser.add_argument("--aws-secret", type=str, required=False, help="Nombre o ARN de secreto a procesar dependiendo de la acción indicada.")
     args = parser.parse_args()
 
     if args.action == "check":
@@ -351,3 +382,9 @@ def main() -> None:
         # Operar.
         profile = resolve_aws_profile(args)
         opt_upload(profile)
+
+    if args.action == "delete":
+        # Operar.
+        profile = resolve_aws_profile(args)
+        secret_name = resolve_secret_name(args, "Error: se debe especificar el secreto a procesar (--aws-secret).")
+        opt_delete(profile, secret_name)
