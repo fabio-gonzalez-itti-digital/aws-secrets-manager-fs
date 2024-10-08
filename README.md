@@ -12,7 +12,7 @@ Ver la sección de [releases](https://github.com/fabio-gonzalez-itti/aws-secrets
 Ejemplo de instalación con `pip`:
 
 ```
-pip install https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases/download/v0.0.1/aws_secrets_fs-0.0.1-py3-none-any.whl
+pip install https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases/download/v0.0.2/aws_secrets_fs-0.0.2-py3-none-any.whl
 ```
 
 ## Modo de Uso
@@ -100,8 +100,16 @@ python -m aws_secrets_fs --action download --aws_profile <profile>
 
 > Observación: Cada descarga de archivos reemplaza cualquier archivo local que se encuentre. Si los archivos tienen cambios locales, estos se perderan.
 
+### Eliminación de Secretos
+Se implementa la acción `delete` para, inicialmente, eliminar secretos de forma individual. La lista de secretos existentes puede ser visualizada desde la consola AWS.
+
+Para eliminar un secreto, ejecutar:
+
+```
+python -m aws_secrets_fs --action delete --aws_profile <profile> --aws-secret <secret-arn-o-nombre>
+```
+
 ## Mejoras a Futuro
-- Implementar eliminación de archivos/secretos. De momento esto se hace manualmente desde la consola AWS.
 - Dar soporte a otros tipos de identidad AWS. De momento solo se utilizan perfiles de usuarios IAM.
 - Dar soporte a archivos binarios. De momento solo se administran archivos de texto plano.
 - Dar soporte para colisiones de nombres de archivo entre entornos diferentes de una misma cuenta AWS.
