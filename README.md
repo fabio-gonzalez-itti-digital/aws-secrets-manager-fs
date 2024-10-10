@@ -2,7 +2,7 @@
 Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.
 
 ## Requerimientos
-- Python 3.
+- Python 3.10 o superior.
 - Boto 3, versión `1.34.120` o superior.
 - AWS CLI, versión `2.x.x` o superior.
 

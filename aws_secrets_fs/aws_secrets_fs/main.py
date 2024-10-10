@@ -3,9 +3,13 @@ import os
 import json
 import hashlib
 import base64
+import sys
 from botocore.exceptions import ClientError
 from . import aws
 
+# Version check.
+if sys.version_info < (3, 10):
+    raise RuntimeError("Este paquete requiere Python 3.10+")
 
 class bcolors:
     """

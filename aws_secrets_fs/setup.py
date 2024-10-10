@@ -10,6 +10,7 @@ setup(
     author_email='fabio.gonzalez@itti.digital',
     license='MIT',
     packages=['aws_secrets_fs'],
+    python_requires='>=3.10',
     install_requires=[
         'boto3==1.34.120'
     ]
