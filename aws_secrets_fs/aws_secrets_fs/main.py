@@ -9,6 +9,17 @@ from . import opt_upload
 from . import opt_delete
 
 
+def resolve_cwd(args: argparse.Namespace) -> str:
+    """
+    Determina la carpeta de trabajo a utilizar.
+    """
+    cwd = args.cwd
+    if cwd == None or cwd == "":
+        return "."
+    else:
+        return cwd.strip()
+
+
 def resolve_aws_profile(args: argparse.Namespace) -> str:
     """
     Determina el perfil AWS a utilizar para ciertas operaciones que lo requieren. Imprime advertencias si es necesario.
@@ -58,6 +69,7 @@ def main() -> None:
     """
     parser = argparse.ArgumentParser(prog="aws_secrets_fs", description="Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.")
     parser.add_argument('--action', type=str, required=True, choices=["check", "download", "upload", "delete"], help="Acción a realizar.")
+    parser.add_argument("--cwd", type=str, required=False, help="Carpeta de trabajo para ciertas acciones que lo requieran.")
     parser.add_argument("--aws-profile", type=str, required=False, help="Nombre del perfil AWS configurado.")
     parser.add_argument("--aws-region", type=str, required=False, help="Nombre de región de preferencia para AWS.")
     parser.add_argument("--aws-secret", type=str, required=False, help="Nombre o ARN de secreto a procesar dependiendo de la acción indicada.")
@@ -67,14 +79,16 @@ def main() -> None:
         opt_check.run()
 
     if args.action == "download":
+        cwd = resolve_cwd(args)
         profile = resolve_aws_profile(args)
         region = resolve_aws_region(args)
-        opt_download.run(profile, region)
+        opt_download.run(cwd, profile, region)
 
     if args.action == "upload":
+        cwd = resolve_cwd(args)
         profile = resolve_aws_profile(args)
         region = resolve_aws_region(args)
-        opt_upload.run(profile, region)
+        opt_upload.run(cwd, profile, region)
 
     if args.action == "delete":
         secret_name = resolve_secret_name(args, "Error: se debe especificar el secreto a procesar (--aws-secret).")

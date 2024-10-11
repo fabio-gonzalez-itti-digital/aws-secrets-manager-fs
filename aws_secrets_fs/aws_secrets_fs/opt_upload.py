@@ -6,16 +6,17 @@ from . import utils
 from . import aws
 
 
-def run(profile: str, region: str):
+def run(cwd: str, profile: str, region: str):
     """
     Procesa las entradas en archivos tipo descriptor y se encarga de subir el contenido de los archivos indicados y asociarlos
     a un secreto de aws secrets manager.
     Parameters:
+        cwd: Carpeta de trabajo.
         profile: Perfil aws a utilizar.
         region: Región aws a utilizar, si hubiere.
     """
     # Obtener descriptores en carpeta actual.
-    descriptors = utils.get_descriptor_files(".")
+    descriptors = utils.get_descriptor_files(cwd)
     if (len(descriptors) == 0):
         print("No se encontraron archivos descriptores.")
         exit(1)
@@ -27,7 +28,7 @@ def run(profile: str, region: str):
             print("\n" + utils.bcolors.OKGREEN + "Subiendo: " + entry.filename + utils.bcolors.ENDC)
 
             # El archivo debe existir.
-            targetfile = os.path.join(".", entry.filename)
+            targetfile = os.path.join(cwd, entry.filename)
             if (os.path.exists(targetfile) == False):
                 print(utils.bcolors.FAIL + "Error: el archivo no existe." + utils.bcolors.ENDC)
                 continue
