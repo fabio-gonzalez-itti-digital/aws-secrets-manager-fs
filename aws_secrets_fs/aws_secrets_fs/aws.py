@@ -41,15 +41,16 @@ def aws_cli_profiles() -> list[str] | None:
         return None
 
 
-def retrieve_secret(secret_name: str, profile: str) -> tuple[str, None] | tuple[None, Exception]:
+def retrieve_secret(secret_name: str, profile: str, region: str) -> tuple[str, None] | tuple[None, Exception]:
     """
     Obtiene el valor de un secreto desde aws secrets manager.
     Parameters:
         secret_name: Nombre del secreto a recuperar.
         profile: Perfil aws a utilizar.
+        region: Región aws a utilizar, si hubiere.
     """
     try:
-        session = boto3.Session(profile_name=profile)
+        session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
         if 'SecretString' in get_secret_value_response:
@@ -62,16 +63,17 @@ def retrieve_secret(secret_name: str, profile: str) -> tuple[str, None] | tuple[
         return None, e
 
 
-def update_secret(secret_name: str, secret_value: str, profile: str) -> tuple[any, None] | tuple[None, Exception]:
+def update_secret(secret_name: str, secret_value: str, profile: str, region: str) -> tuple[any, None] | tuple[None, Exception]:
     """
     Actualiza el valor de un secreto en aws secrets manager.
     Parameters:
         secret_name: Nombre del secreto a actualizar.
         secret_value: Nuevo valor para secreto.
         profile: Perfil aws a utilizar.
+        region: Región aws a utilizar, si hubiere.
     """
     try:
-        session = boto3.Session(profile_name=profile)
+        session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.update_secret(
             SecretId=secret_name, SecretString=secret_value)
@@ -80,16 +82,17 @@ def update_secret(secret_name: str, secret_value: str, profile: str) -> tuple[an
         return None, e
 
 
-def create_secret(secret_name: str, secret_value: str, profile: str) -> tuple[any, None] | tuple[None, Exception]:
+def create_secret(secret_name: str, secret_value: str, profile: str, region: str) -> tuple[any, None] | tuple[None, Exception]:
     """
     Registra el valor para un nuevo secreto en aws secrets manager.
     Parameters:
         secret_name: Nombre del secreto a crear.
         secret_value: Valor para secreto.
         profile: Perfil aws a utilizar.
+        region: Región aws a utilizar, si hubiere.
     """
     try:
-        session = boto3.Session(profile_name=profile)
+        session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.create_secret(
             Name=secret_name,
@@ -100,16 +103,16 @@ def create_secret(secret_name: str, secret_value: str, profile: str) -> tuple[an
         return None, e
 
 
-def delete_secret(secret_name: str, profile: str) -> tuple[any, None] | tuple[None, Exception]:
+def delete_secret(secret_name: str, profile: str, region: str) -> tuple[any, None] | tuple[None, Exception]:
     """
     Elmina un secreto en aws secrets manager.
     Parameters:
         secret_name: Nombre del secreto a eliminar.
-        secret_value: Valor para secreto.
         profile: Perfil aws a utilizar.
+        region: Región aws a utilizar, si hubiere.
     """
     try:
-        session = boto3.Session(profile_name=profile)
+        session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.delete_secret(
             SecretId=secret_name,
