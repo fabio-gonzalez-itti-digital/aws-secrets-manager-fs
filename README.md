@@ -12,7 +12,7 @@ Ver la sección de [releases](https://github.com/fabio-gonzalez-itti/aws-secrets
 Ejemplo de instalación con `pip`:
 
 ```
-pip install https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases/download/v0.0.2/aws_secrets_fs-0.0.2-py3-none-any.whl
+pip install https://github.com/fabio-gonzalez-itti/aws-secrets-manager-fs/releases/download/v0.0.3/aws_secrets_fs-0.0.3-py3-none-any.whl
 ```
 
 ## Modo de Uso
