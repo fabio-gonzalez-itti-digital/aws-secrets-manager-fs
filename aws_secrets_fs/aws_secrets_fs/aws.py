@@ -41,6 +41,14 @@ def aws_cli_profiles() -> list[str] | None:
         return None
 
 
+def guard_aws_value(value: str) -> str | None:
+    """
+    Ajusta el valor indicado y retorna el valor apropiado
+    para el API de boto3.
+    """
+    return None if value == "" else value
+
+
 def retrieve_secret(secret_name: str, profile: str, region: str) -> tuple[str, None] | tuple[None, Exception]:
     """
     Obtiene el valor de un secreto desde aws secrets manager.
@@ -50,6 +58,8 @@ def retrieve_secret(secret_name: str, profile: str, region: str) -> tuple[str, N
         region: Región aws a utilizar, si hubiere.
     """
     try:
+        profile = guard_aws_value(profile)
+        region = guard_aws_value(region)
         session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
@@ -73,6 +83,8 @@ def update_secret(secret_name: str, secret_value: str, profile: str, region: str
         region: Región aws a utilizar, si hubiere.
     """
     try:
+        profile = guard_aws_value(profile)
+        region = guard_aws_value(region)
         session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.update_secret(
@@ -92,6 +104,8 @@ def create_secret(secret_name: str, secret_value: str, profile: str, region: str
         region: Región aws a utilizar, si hubiere.
     """
     try:
+        profile = guard_aws_value(profile)
+        region = guard_aws_value(region)
         session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.create_secret(
@@ -112,6 +126,8 @@ def delete_secret(secret_name: str, profile: str, region: str) -> tuple[any, Non
         region: Región aws a utilizar, si hubiere.
     """
     try:
+        profile = guard_aws_value(profile)
+        region = guard_aws_value(region)
         session = boto3.Session(profile_name=profile, region_name=region)
         client = session.client('secretsmanager')
         response = client.delete_secret(
