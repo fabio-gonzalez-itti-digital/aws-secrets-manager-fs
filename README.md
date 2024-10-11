@@ -2,8 +2,8 @@
 Herramienta que permite sincronizar archivos con datos sensibles, utilizando AWS Secrets Manager como backend.
 
 ## Requerimientos
-- Python 3.10 o superior.
-- Boto 3, versión `1.34.120` o superior.
+- Python, `3.10` o superior.
+- Boto3, versión `1.34.120` o superior.
 - AWS CLI, versión `2.x.x` o superior.
 
 ## Instalación
@@ -66,7 +66,7 @@ db.inc.php => /my_app/dev/db.inc.php
 Procedemos a subir el contenido sensible a Secrets Manager con la acción `upload` indicando el perfil AWS a utilizar:
 
 ```
-python -m aws_secrets_fs --action upload --aws_profile <profile>
+python -m aws_secrets_fs --action upload --aws-profile <profile>
 ```
 
 Si todo está correcto, los archivos locales estarán almacenados en AWS Secrets Manager y pueden ser eliminados del entorno local para luego proceder a versionar el archivo descriptor. De esta manera, no se compromete el contenido de carácter sensible de los archivos y se mantiene un seguimiento de cambios a través de los archivos descriptores.
@@ -94,8 +94,7 @@ En el proceso inverso a la subida de archivos, siguiendo el ejemplo anterior ten
 Para recuperar nuestros archivos sensibles, basta con ejecutar la acción `download` de la herramienta indicando de igual forma el perfil AWS a utilizar.
 
 ```
-cd /my_app/config/php
-python -m aws_secrets_fs --action download --aws_profile <profile>
+python -m aws_secrets_fs --action download --aws-profile <profile>
 ```
 
 > Observación: Cada descarga de archivos reemplaza cualquier archivo local que se encuentre. Si los archivos tienen cambios locales, estos se perderan.
@@ -106,7 +105,7 @@ Se implementa la acción `delete` para, inicialmente, eliminar secretos de forma
 Para eliminar un secreto, ejecutar:
 
 ```
-python -m aws_secrets_fs --action delete --aws_profile <profile> --aws-secret <secret-arn-o-nombre>
+python -m aws_secrets_fs --action delete --aws-profile <profile> --aws-secret <secret-arn-o-nombre>
 ```
 
 ## Mejoras a Futuro
